@@ -1,0 +1,66 @@
+- name: disable current nodejs
+  ansible.builtin.command: dnf module disable nodejs -y
+
+- name: enable nodejs 20
+  ansible.builtin.command: dnf module enable nodejs:20 -y
+
+- name: Install nodejs & mysql
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop:
+  - nodejs
+  - mysql 
+  
+- name: Create expense user
+  ansible.builtin.user:
+    name: expense
+  
+- name: Create App directory
+  ansible.builtin.file:
+    path: /app
+    state: directory # if we don't specify anything, then by default it will be considered as file
+
+- name: Download Backend Code
+  ansible.builtin.get_url:
+    url: https://expense-builds.s3.us-east-1.amazonaws.com/expense-backend-v2.zip
+    dest: /tmp/backend.zip
+
+- name: Unzip Backend Code
+  ansible.builtin.unarchive:
+    src: /tmp/backend.zip
+    dest: /app
+    remote_src: yes # It says my source is in remote machine, don't look for the file in ansible controller. If we don't enable it, by default, it looks the source in ansible controller in ansibler server.
+
+- name: Install Dependencies
+  community.general.npm: # it goes to the path location and installs dependencies based on nodejs version.
+    path: /app
+
+- name: copy backsend service 
+  ansible.builtin.copy:
+    src: backend.service
+    dest: /etc/systemd/system/backend.service
+
+- name: Install Mysql Libraries
+  ansible.builtin.pip:
+    name: "{{ item }}"
+    executable: pip3.9
+  loop:
+  - cryptography
+  - PyMySQL    
+
+- name: Import Mysql Data Schema
+  community.mysql.mysql_db:
+    state: import
+    name: all
+    login_user: {{ MYSQL_USER }}
+    login_password: {{ MYSQL_PASSWORD }}
+    login_host: {{ MYSQL_HOST }}
+    target: /app/schema/backend.sql
+
+- name: daemon reload and restart service
+  ansible.builtin.systemd_service:
+    enabled: true
+    state: restarted
+    daemon_reload: true
+    name: backend
