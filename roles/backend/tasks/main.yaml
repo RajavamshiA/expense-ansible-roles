@@ -36,7 +36,7 @@
   community.general.npm: # it goes to the path location and installs dependencies based on nodejs version.
     path: /app
 
-- name: copy backsend service 
+- name: copy backend service 
   ansible.builtin.copy:
     src: backend.service
     dest: /etc/systemd/system/backend.service
