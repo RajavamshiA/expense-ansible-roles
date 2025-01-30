@@ -1,4 +1,3 @@
-tasks:
 - name: Install Mysql Libraries
   ansible.builtin.pip:
     name: "{{ item }}"
