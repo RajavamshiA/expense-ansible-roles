@@ -9,26 +9,34 @@
     state: started
     enabled: yes
 
-- name: delete html directory
-  ansible.builtin.file:
-    path: /usr/share/nginx/html
-    state: absent # if we put absent, it will delete the supplied folder.
+- name: include tasks from common role 
+  include_role:
+    name: common
+    tasks_from: main 
 
-- name: Create html directory
-  ansible.builtin.file:
-    path: /usr/share/nginx/html
-    state: directory
+  # we need to provide folder name in frontend's-> var's-> main.yaml  file, so that when we use above task, it will dynamically updates its tasks with the value supplied(In this case, it is /usr/share/nginx/html)
 
-- name: download frontend code
-  ansible.builtin.get_url:
-    url: https://expense-builds.s3.us-east-1.amazonaws.com/expense-frontend-v2.zip
-    dest: /tmp/frontend.zip
 
-- name: unzip frontend code
-  ansible.builtin.unarchive:
-    src: /tmp/frontend.zip
-    dest: /usr/share/nginx/html
-    remote_src: yes
+# - name: delete html directory
+#   ansible.builtin.file:
+#     path: /usr/share/nginx/html
+#     state: absent # if we put absent, it will delete the supplied folder.
+
+# - name: Create html directory
+#   ansible.builtin.file:
+#     path: /usr/share/nginx/html
+#     state: directory
+
+# - name: download frontend code
+#   ansible.builtin.get_url:
+#     url: https://expense-builds.s3.us-east-1.amazonaws.com/expense-frontend-v2.zip
+#     dest: /tmp/frontend.zip
+
+# - name: unzip frontend code
+#   ansible.builtin.unarchive:
+#     src: /tmp/frontend.zip
+#     dest: /usr/share/nginx/html
+#     remote_src: yes
 
 - name: copy expense config
   ansible.builtin.template:
