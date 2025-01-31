@@ -17,6 +17,8 @@
     name: expense
 
 - name: include tasks from common role 
+  tags: 
+  - deployment
   include_role:
     name: common
     tasks_from: main 
@@ -40,6 +42,8 @@
 #     remote_src: yes # It says my source is in remote machine, don't look for the file in ansible controller. If we don't enable it, by default, it looks the source in ansible controller in ansibler server.
 
 - name: Install Dependencies
+  tags:
+  - deployment # Tagging is useful if we want to run the tasks which are necessary, but this can be done only after first successful deployment of the application.
   community.general.npm: # it goes to the path location and installs dependencies based on nodejs version.
     path: /app
 
@@ -66,6 +70,8 @@
     target: /app/schema/backend.sql
 
 - name: daemon reload and restart service
+  tags: 
+  - deployment
   ansible.builtin.systemd_service:
     enabled: true
     state: restarted
