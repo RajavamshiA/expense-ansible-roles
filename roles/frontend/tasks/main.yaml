@@ -45,3 +45,6 @@
   notify: 
   - Restart Nginx
 
+  # Handlers are notifiers. when one event happens, it will trigger the other event.
+  
+
